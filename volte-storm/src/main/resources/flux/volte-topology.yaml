@@ -1,0 +1,107 @@
+name: "volte-topology"
+
+config:
+  topology.workers: 40
+
+  topology.worker.childopts: "-server -Xms6g -Xmx6g -Xmn3g -XX:ParallelGCThreads=10"
+  topology.fall.back.on.java.serialization: false
+  topology.skip.missing.kryo.registrations: false
+  topology.acker.executors: 0
+  topology.executor.send.buffer.size: 2048
+  topology.executor.receive.buffer.size: 2048
+  topology.receiver.buffer.size: 64
+  topology.transfer.buffer.size: 8192
+  storm.messaging.netty.sync.mode: false
+  topology.buffer.size.limited: false
+
+  project.spout.parallelism: 20
+  project.bolt.parallelism: 10
+
+
+  project.spout.name: "VoLTESpout"
+  project.bolt.name: "VoLTEBolt"
+  project.output.name: "OutputDataBolt"
+
+  project.spout.threads.file: 5
+  project.spout.threads.read: 1
+
+  project.activemq.broker.mqURL: "tcp://10.221.247.23:61616"
+  project.activemq.name: "ActiveMQ"
+  project.activemq.queue.name: "Q_EVENT_PMCA_FILE"
+
+  project.spout.tuple.name: "spoutData"
+  project.bolt.tuple.name: "boltData"
+  project.output.name: "outputHDFS"
+
+
+  project.hdfs.url: "hdfs://nameservice1"
+  project.hdfs.path: "/rawdata/xdr/lte/volte/volte_timeseg/"
+
+  project.properties.path: "../flux/volte-configration.properties"
+
+  # 最好把驱动打成架包，动态获取
+  project.jdbc.driver: "com.mysql.jdbc.Driver"
+  project.jdbc.url: "jdbc:mysql://10.11.58.95:3306/Volte"
+  project.jdbc.username: "root"
+  project.jdbc.password: "root"
+  project.jdbc.table.name: "NetworkElement"
+
+
+#  # zk data
+#  project.spout.zk.config: ["",""]
+
+#  # 以下全部转到ZK
+#  project.spout.tuple.name: "spoutData"
+#  project.bolt.tuple.name: "boltData"
+
+#  project.esper.map.name: "Person"
+#  project.esper.eplStatement.name: "select"
+#  project.esper.eplStatement.statement: "select irstream name, age from Person.win:time(1 sec) where name !="""
+
+  worker.childopts: "-Xmx3g"
+  topology.metrics.consumer.register:
+    - class: "org.apache.storm.metric.LoggingMetricsConsumer"
+      parallelism.hint: 1
+
+includes:
+  - resource: false
+    file: "../../linghang.kong/volte/flux/redisPool.yaml"
+    override: false
+  - resource: false
+    file: "../../linghang.kong/volte/flux/serializer.yaml"
+    override: false
+
+topologySource:
+    className: "com.eastcom.volte.storm.storm.worker.VoLTETopology"
+    methodName: "getTopology"
+
+
+## spout definitions
+#spouts:
+#  - id: "esperSpout"
+#    className: "worker.WorkerSpoutut"
+#    parallelism: 5
+#
+## bolt definitions
+#bolts:
+#  - id: "esperBolt1"
+#    className: "worker.WorkerBoltlt"
+#    parallelism: 5
+#  #- id: "esperBolt2"
+#   # className: "worker.WorkerBoltlt"
+#    #parallelism: 1
+#
+##stream definitions
+#streams:
+#  - name: "esperSpout --> esperBolt1" # name isn't used (placeholder for logging, UI, etc.)
+#    from: "esperSpout"
+#    to: "esperBolt1"
+#    grouping:
+#      type: FIELDS
+#      args: ["esperspoutdata"]
+#
+#  #- name: "esperBolt1 --> esperBolt2"
+#   # from: "esperBolt1"
+#    #to: "esperBolt2"
+#    #grouping:
+#      #type: SHUFFLE

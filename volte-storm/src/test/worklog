@@ -1,0 +1,82 @@
+半途记录，从2016年8月22日起，详情请见evernote worklog
+
+工作步骤：
+    common
+    1、Data类、序列化类、解析类。 已完成 未测试
+    2、mq工厂及其ActiveMQ实现。 已完成 已测试
+    3、reader工厂及其FTP实现。 已完成 无法测试
+    4、RedisPool实现，基于twemproxy。 已完成 已测试
+    5、kryo工具。 已完成 未测试
+
+    storm
+    1、storm基础类。 未完成—>4 未测试
+    2、storm worker类 未完成
+    3、service类 未完成
+        1、加载数据：接口数据加载完成，xdr数据加载未完成 已完成 未测试
+        2、数据分区 put\get 已完成 未测试
+        3、读取数据 已完成 未测试
+        4、清除策略，需要修改分区名称，由id+timestamp组成 已完成 未测试
+        5、算法实现 已完成 未测试
+        6、加载网元数据到mysql/oracle 已完成 但是只能手动加载
+    4、worker
+        1、spout类实现
+            1、加载数据  已完成
+            2、发射分区  已完成
+            spout不读取数据，只发射分区名称，由bolt来操作不同的分区，保证一致性。
+        2、bolt类实现
+            1、读取数据  已完成
+            2、分析数据  已完成
+            3、发射数据  已完成
+
+        3、存储数据 已完成
+
+        4、topology类实现
+            1、实现topology 已完成 未测试
+            2、清除数据 已完成 未测试
+    5、resource
+        配置设置 已完成 未测试
+
+注意情况：
+    4个接口的输入输出方式需要和合成xdr分开处理
+预留问题：
+
+讨论结果：
+存储：Redis HashMap 数据表
+    Key: xdr_id（mod)(真实时间，取一分钟策略)
+    Field: xdr_id
+    Value: object
+
+    Redis Set 过期xdr表 n个 不固定
+    Key: expired-完整时间 n个
+    value:  xdr_id（mod)+xdr_id
+
+    步骤：
+        合成xdr：单独存储 MergedXDR
+        数据存储：
+            1、存储在数据表中一份
+            2、获取数据start time，转换成完整时间，
+            根据完整时间作为Key生成过期表，
+            Value: xdr_id（mod)+xdr_id
+读取：
+    合成xdr读取：
+    1、直接读取xdr单独的表
+    2、需要重新写合成xdr的加载类
+
+    数据读取：
+    1、根据xdr_id直接读取数据表
+
+清除策略：
+    合成xdr：读一个清除一个
+    数据：
+    1、时间策略：在程序启动后一个小时，并且每隔一个小时进行
+    2、获取当前时间的完整时间，查询过期表，遍历获得过期的xdr的set，进行清除。
+
+测试代码：
+    1、建立hdfs路径
+    2、
+
+部署命令：
+/home/ipms/linghang.kong/volte/target
+./storm jar ~/linghang.kong/volte/target/volte.jar org.apache.storm.flux.Flux --remote ~/linghang.kong/volte/flux/volte-topology.yaml
+
+工期 2016年10月27日 基本完成功能、性能。

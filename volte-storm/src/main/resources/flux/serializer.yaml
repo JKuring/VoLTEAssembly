@@ -1,0 +1,23 @@
+config:
+    topology.kryo.register:
+    - com.eastcom.volte.data.gmtype.gm.Gm: com.eastcom.volte.data.gmtype.gm.GmSerializer
+    - com.eastcom.volte.data.gmtype.isc.ISC: com.eastcom.volte.data.gmtype.isc.ISCSerializer
+    - com.eastcom.volte.data.gmtype.mg.Mg: com.eastcom.volte.data.gmtype.mg.MgSerializer
+    - com.eastcom.volte.data.gmtype.mi.Mi: com.eastcom.volte.data.gmtype.mi.MiSerializer
+    - com.eastcom.volte.data.gmtype.mj.Mj: com.eastcom.volte.data.gmtype.mj.MjSerializer
+    - com.eastcom.volte.data.gmtype.mw.Mw: com.eastcom.volte.data.gmtype.mw.MwSerializer
+
+    - com.eastcom.volte.data.cxtype.cx.Cx: com.eastcom.volte.data.cxtype.cx.CxSerializer
+    - com.eastcom.volte.data.cxtype.dh.Dh: com.eastcom.volte.data.cxtype.dh.DhSerializer
+    - com.eastcom.volte.data.cxtype.dx.Dx: com.eastcom.volte.data.cxtype.dx.DxSerializer
+    - com.eastcom.volte.data.cxtype.sh.Sh: com.eastcom.volte.data.cxtype.sh.ShSerializer
+    - com.eastcom.volte.data.cxtype.zh.Zh: com.eastcom.volte.data.cxtype.zh.ZhSerializer
+
+    - com.eastcom.volte.data.gxtype.rx.Rx: com.eastcom.volte.data.gxtype.rx.RxSerializer
+
+    - com.eastcom.volte.data.xdr.MergedXDR: com.eastcom.volte.data.xdr.MergedXDRSerializer
+
+    - com.eastcom.volte.data.nc.Nc: com.eastcom.volte.data.nc.NcSerializer
+    - com.eastcom.volte.data.volte.VoLTE: com.eastcom.volte.data.volte.VoLTESerializer
+
+    - com.eastcom.volte.storm.storm.arithmetic.MergedArithmetic: com.esotericsoftware.kryo.serializers.JavaSerializer
