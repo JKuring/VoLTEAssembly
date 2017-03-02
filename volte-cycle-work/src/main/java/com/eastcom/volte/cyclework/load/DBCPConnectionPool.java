@@ -1,6 +1,8 @@
 package com.eastcom.volte.cyclework.load;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -11,6 +13,8 @@ import java.sql.SQLException;
  * Created by linghang.kong on 2016/9/28.
  */
 public class DBCPConnectionPool {
+
+    private static final Logger logger = LoggerFactory.getLogger(DBCPConnectionPool.class);
 
     private DataSource dataSource;
 
@@ -27,7 +31,12 @@ public class DBCPConnectionPool {
         return dataSource.getConnection();
     }
 
-    public ResultSet executeQuery(Connection connection, String sql) throws SQLException {
-        return connection.createStatement().executeQuery(sql);
+    public ResultSet executeQuery(Connection connection, String sql) {
+        try {
+            return connection.createStatement().executeQuery(sql);
+        } catch (SQLException e) {
+            logger.error(e.getMessage());
+        }
+        return null;
     }
 }

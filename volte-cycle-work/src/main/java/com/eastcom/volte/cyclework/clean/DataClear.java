@@ -6,6 +6,9 @@ import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -28,6 +31,8 @@ public class DataClear {
     private ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
     //    private ScheduledExecutorService s = new ScheduledThreadPoolExecutor(5);
     private Runnable doClean;
+
+    private static final String algorithm = "MD5";
 
     public DataClear(long DELAY_TIME, long CLEAR_TIME) {
         this.DELAY_TIME = DELAY_TIME;
@@ -59,9 +64,12 @@ public class DataClear {
                             } while (jedis == null && !jedis.isConnected());
                             pipeline = jedis.pipelined();
                             String currentTime = TimeTransform.getDate(System.currentTimeMillis() - DELAY_TIME * 60 * 60 * 1000);
-                            Set<String> expireTable = jedis.smembers(currentTime);
+                            //添加加密分区算法
+                            String encodedTimePartitionName = subMD5String(currentTime) + "|" + currentTime;
+
+                            Set<String> expireTable = jedis.smembers(encodedTimePartitionName);
                             int table_size = expireTable.size();
-                            logger.info("table size {}, currentTime {}; ip: {}, port: {}.", expireTable.size(), currentTime, jedisIP, jedisPort);
+                            logger.info("table size {}, encodedTimePartitionName {}; ip: {}, port: {}.", expireTable.size(), encodedTimePartitionName, jedisIP, jedisPort);
                             if (table_size > 0) {
                                 for (String expireInfo : expireTable
                                         ) {
@@ -77,7 +85,7 @@ public class DataClear {
                                     }
                                     logger.debug("partition: {}, xdr_id: {}.", partitionName, xdr_id);
                                 }
-                                pipeline.del(currentTime);
+                                pipeline.del(encodedTimePartitionName);
                                 pipeline.sync();
                             }
                         } catch (Exception e) {
@@ -109,5 +117,19 @@ public class DataClear {
             logger.error("Create a  Jedis Handle , Exception: {}.", e.getMessage());
         }
         return jedis;
+    }
+
+    private String subMD5String(String string) {
+        String encodedString = null;
+        try {
+            MessageDigest messageDigest = MessageDigest.getInstance(algorithm);
+            messageDigest.update(string.getBytes());
+            String tmp = new BigInteger(messageDigest.digest()).toString();
+            int length = tmp.length();
+            encodedString = algorithm + tmp.substring(length - 5);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return encodedString;
     }
 }

@@ -97,6 +97,7 @@ public class LoaderService extends Thread implements Loader {
                                     data = bufferedReader.readLine();
                                 }
                             }
+//                            this.readable.
                         }
                     } catch (Exception e) {
                         logger.error("Read is failure. Type: {}, exception: {}, message: {}.", type, e.getMessage(), messgae);

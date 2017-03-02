@@ -10,6 +10,9 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 import redis.clients.util.Pool;
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +34,8 @@ public class DataPartitioning implements Partitioning<DataCommon, String> {
     private Pipeline pipeline;
 
     private int cacheSize;
+
+    private static final String algorithm = "MD5";
 
 
     public DataPartitioning(Pool<Jedis> jedisPool) {
@@ -90,7 +95,8 @@ public class DataPartitioning implements Partitioning<DataCommon, String> {
                 // store data to data table.
                 pipeline.hset((partition).getBytes(), xdr_id.getBytes(), bytesData);
                 // store data to expired table.
-                pipeline.sadd(TimeTransform.getDate(System.currentTimeMillis()), partition + '|' + xdr_id);
+                String currentTime = TimeTransform.getDate(System.currentTimeMillis());
+                pipeline.sadd(subMD5String(currentTime) + "|" + currentTime, partition + '|' + xdr_id);
                 this.cacheSize--;
                 if (this.cacheSize <= 0) {
                     // sync and close pipeline
@@ -158,30 +164,8 @@ public class DataPartitioning implements Partitioning<DataCommon, String> {
                             logger.error("Exception {}, can't find partition {} and xdr {}, index {}.", e.getMessage(), partition_tmp, xdr_id_tmp, i);
                             reconnect();
                         }
-                        // redo schedule
-//                        int redo_times = 3;
-//                        while(redo_times > 0) {
-//                            try {
-//                                logger.debug("xdr_id: {}, {}.", xdr_id_tmp, i);
-//                                xdrBytes = jedis.hget(partition, xdr_id_Bytes);
-//                                intcount++;
-//                                break;
-//                            } catch (Exception e) {
-//                                logger.error("Exception {}, can't find partition {} and xdr {}, index {}.", e.getMessage(), partition_tmp, xdr_id_tmp, i);
-//                                logger.info("redo to add data {}.",xdr_id_tmp);
-//                                reconnect();
-//                                redo_times--;
-//                            }
-//                        }
                         if (xdrBytes != null && xdrBytes.length > 0) {
                             dataCommonList.add(getObject(xdrBytes));
-                            // clear used xdr
-//                            try {
-//                                jedis.hdel(partition, xdr_id_Bytes);
-//                            }catch (Exception e){
-//                                reconnect();
-//                                logger.debug("{}, Can't delete xdr {}, {}.",e.getMessage(), xdr_id_tmp,i);
-//                            }
                             outcount++;
                             logger.debug("count {}, {}, add xdr: {}, {}.", intcount, outcount, xdr_id_tmp, i);
                         } else dataCommonList.add(null);
@@ -223,13 +207,23 @@ public class DataPartitioning implements Partitioning<DataCommon, String> {
 
     private void reconnect() {
         //reconnect
-//        if (!jedis.isConnected()) {
         this.jedisPool.returnBrokenResource(jedis);
-//        } else {
-//            this.jedisPool.returnResource(jedis);
-//        }
         this.jedis = this.jedisPool.getResource();
         logger.debug("reconnect redis service.");
+    }
+
+    private String subMD5String(String string) {
+        String encodedString = null;
+        try {
+            MessageDigest messageDigest = MessageDigest.getInstance(algorithm);
+            messageDigest.update(string.getBytes());
+            String tmp = new BigInteger(messageDigest.digest()).toString();
+            int length = tmp.length();
+            encodedString = algorithm + tmp.substring(length - 5);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return encodedString;
     }
 
 }

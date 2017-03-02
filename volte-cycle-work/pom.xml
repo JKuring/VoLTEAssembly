@@ -23,10 +23,23 @@
             <version>2.1</version>
         </dependency>
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.18</version>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis</artifactId>
+            <version>3.4.1</version>
         </dependency>
+        <!--<dependency>-->
+        <!--<groupId>mysql</groupId>-->
+        <!--<artifactId>mysql-connector-java</artifactId>-->
+        <!--<version>5.1.18</version>-->
+        <!--</dependency>-->
+
+        <!-- https://mvnrepository.com/artifact/ojdbc/ojdbc -->
+        <!--<dependency>-->
+        <!--<groupId>ojdbc</groupId>-->
+        <!--<artifactId>ojdbc</artifactId>-->
+        <!--<version>14</version>-->
+        <!--</dependency>-->
+
 
         <dependency>
             <groupId>log4j</groupId>

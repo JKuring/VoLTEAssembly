@@ -10,10 +10,10 @@ public class DataClearTest {
     public void cleanScheduler() throws Exception {
 
         // 启动清除策略
-        new DataClear(3, 1).cleanScheduler();
+//        new DataClear(3, 1).cleanScheduler();
 
-        Thread.currentThread().join();
 
+//        Thread.currentThread().join();
     }
 
 }

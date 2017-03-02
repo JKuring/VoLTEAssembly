@@ -14,7 +14,7 @@ config:
   storm.messaging.netty.sync.mode: false
   topology.buffer.size.limited: false
 
-  project.spout.parallelism: 20
+  project.spout.parallelism: 10
   project.bolt.parallelism: 10
 
 
@@ -22,7 +22,7 @@ config:
   project.bolt.name: "VoLTEBolt"
   project.output.name: "OutputDataBolt"
 
-  project.spout.threads.file: 5
+  project.spout.threads.file: 1
   project.spout.threads.read: 1
 
   project.activemq.broker.mqURL: "tcp://10.221.247.23:61616"

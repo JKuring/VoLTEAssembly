@@ -10,7 +10,7 @@ import java.util.Set;
  * TwmpProxy-Redis 的清除方案
  */
 public class DelRedisPartition {
-    private static int count = 0;
+    private static Long count = 0L;
     private String ip;
     private int port;
     private String[] ipPort;
@@ -101,19 +101,33 @@ public class DelRedisPartition {
         jedis = new Jedis(ipPort[0], Integer.parseInt(ipPort[1]));
         jedis.auth(jedisInfo.getPassword());
         jedis.connect();
-//        xdrKeys = jedis.keys("2016-10-27*");
-        jedis.configSet("maxmemory", "20000000000");
-//        if (xdrKeys.size() > 0) {
-////            for (String xdrKey : xdrKeys
-////                    ) {
-//////                count += jedis.hlen(xdrKey);
-//////                count += jedis.scard(xdrKey);
-//////                System.out.println(jedis.get("successfulNUM"));
-//////                System.out.println(Arrays.toString(jedis.hkeys(xdrKey).toArray()));
-////            }
-////            return "" + count;
-//            return Arrays.toString(xdrKeys.toArray());
+
+        //查找网元
+//        if (jedis.keys("NetworkElement").size()>0){
+//            Set<String> set= jedis.hgetAll("NetworkElement").keySet();
+//            for (String name: set
+//                 ) {
+//                System.out.println(name);
+//            }
 //        }
+
+//        jedis.configSet("maxmemory", "12000000000");
+
+        // 统计时间分区
+        xdrKeys = jedis.keys("MD5*");
+        if (xdrKeys.size() > 0) {
+            for (String xdrKey : xdrKeys
+                    ) {
+                System.out.println(xdrKey);
+//                count += jedis.hlen(xdrKey);
+//                count += jedis.scard(xdrKey);
+//                System.out.println(jedis.get("successfulNUM"));
+//                System.out.println(Arrays.toString(jedis.hkeys(xdrKey).toArray()));
+            }
+//            return "" + count;
+//            return Arrays.toString(xdrKeys.toArray());
+        }
+
         jedis.close();
         return null;
     }
