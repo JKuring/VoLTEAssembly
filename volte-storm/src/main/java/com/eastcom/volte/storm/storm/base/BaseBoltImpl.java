@@ -28,9 +28,6 @@ public abstract class BaseBoltImpl<T, W> extends BaseRichBolt implements BaseBol
 
     private static final Logger logger = LoggerFactory.getLogger(BaseBoltImpl.class);
 
-    private int boltParallelism;
-    private int readThread_NUM;
-    private String spoutTupleName;
     // 输出外部配置更改，这里也要更改，declare先于prepare
     private String boltTupleName = "boltData";
     private int redisMinMultiple;
@@ -70,7 +67,7 @@ public abstract class BaseBoltImpl<T, W> extends BaseRichBolt implements BaseBol
 
     public void execute(final Tuple input) {
         final BaseBoltImpl baseBolt = this;
-        dataCommon = (DataCommon) input.getValueByField(spoutTupleName);
+        dataCommon = (DataCommon) input.getValueByField("partition");
         if (dataCommon != null) {
 //            this.executorService.execute(new Runnable() {
 //                @Override
@@ -88,30 +85,6 @@ public abstract class BaseBoltImpl<T, W> extends BaseRichBolt implements BaseBol
 
     public abstract void analyzeTuple(W data, OutputCollector collector);
 
-    public int getBoltParallelism() {
-        return boltParallelism;
-    }
-
-    public void setBoltParallelism(int boltParallelism) {
-        this.boltParallelism = boltParallelism;
-    }
-
-    public int getReadThread_NUM() {
-        return readThread_NUM;
-    }
-
-    public void setReadThread_NUM(int readThread_NUM) {
-        this.readThread_NUM = readThread_NUM;
-    }
-
-
-    public String getSpoutTupleName() {
-        return spoutTupleName;
-    }
-
-    public void setSpoutTupleName(String spoutTupleName) {
-        this.spoutTupleName = spoutTupleName;
-    }
 
     public String getBoltTupleName() {
         return boltTupleName;

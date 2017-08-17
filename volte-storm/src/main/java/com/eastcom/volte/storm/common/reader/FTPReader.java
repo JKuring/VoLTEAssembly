@@ -3,103 +3,92 @@ package com.eastcom.volte.storm.common.reader;
 import com.google.common.base.Charsets;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
-import org.apache.commons.net.ftp.FTPReply;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
-import java.net.SocketException;
-import java.net.URI;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
 
+/**
+ * Created by linghang.kong on 2016/8/15.
+ */
 public class FTPReader implements Readable {
 
     private static Logger logger = LoggerFactory.getLogger(FTPReader.class);
 
-    public static FTPClient connect(URI uri) throws SocketException, IOException {
-        String host = uri.getHost();
-        String userAndPassword = uri.getUserInfo();
-        String[] userPasswdInfo = userAndPassword.split(":");
-        String username = userPasswdInfo[0];
-        String password = userPasswdInfo[1];
-        int port = uri.getPort();
-        port = (port == -1) ? FTP.DEFAULT_PORT : port;
+    private final int connectTimeout = 30000;
+    private final int dataTimeout = 120000;
+    private final int retryTimes = 3;
+    private final int bufferSize = 1048576;
+    private FTPClient ftpClient;
 
-        return FTPReader.connect(host, port, username, password);
+    public FTPReader() {
+        this.ftpClient = new FTPClient();
+        this.ftpClient.setConnectTimeout(this.connectTimeout);
+        this.ftpClient.setDataTimeout(this.dataTimeout);
     }
 
-    public static FTPClient connect(String host, int port, String username, String password)
-            throws SocketException, IOException {
-        FTPClient ftpClient = new FTPClient();
-        ftpClient.setConnectTimeout(10000);
-        ftpClient.setDataTimeout(60000);
+    private FTPClient connect(URL url) throws IOException {
+        String host = url.getHost();
+        int port = url.getPort();
+        String[] userAndPassword = url.getUserInfo().split(":");
+        String user = userAndPassword[0];
+        String password = userAndPassword[1];
+        // 如果port为-1，即为指定，用默认port 21
+        port = (port == -1) ? FTP.DEFAULT_PORT : port;
+        return connect(host, port, user, password);
+    }
+
+    private FTPClient connect(String host, int port, String user, String password) throws IOException {
         try {
+
             ftpClient.connect(host, port);
-        } catch (Exception e) {
-            logger.error("Ftp connect failed. host:{}.", host);
+            if (!ftpClient.login(user, password)) {
+                logger.warn("User {} can't login FTP server.", user);
+                throw new IOException("login failure");
+            }
+            ftpClient.setFileTransferMode(FTP.BLOCK_TRANSFER_MODE);
+            ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
+            ftpClient.setBufferSize(this.bufferSize);
+            return ftpClient;
+        } catch (IOException e) {
+            logger.error("connect failure: {}. host: {}, port: {}, user: {}, password: {}.", e.getMessage(), host, port, user, password);
+            close();
             throw e;
         }
-        int reply = ftpClient.getReplyCode();
-        if (!FTPReply.isPositiveCompletion(reply)) {
-            ftpClient.disconnect();
-            logger.error("Ftp connect failed. host:{}, reply:{}.", host, reply);
-            throw new RuntimeException("Ftp connect failed.");
-        }
-        if (ftpClient.login(username, password) == false) {
-            ftpClient.disconnect();
-            logger.error("Ftp login failed. host:{}, username:{}, password:{}.", host, username, password);
-            throw new RuntimeException("Ftp login failed.");
-        }
-        ftpClient.setFileTransferMode(FTP.BLOCK_TRANSFER_MODE);
-        ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
-        ftpClient.setBufferSize(1048576);
-        return ftpClient;
     }
 
-    public static void close(FTPClient ftpClient) throws IOException {
-        boolean cmdCompleted = ftpClient.completePendingCommand();
-        ftpClient.logout();
-        ftpClient.disconnect();
-        if (!cmdCompleted) {
-            logger.error("Could not complete transfer, Reply Code - " + ftpClient.getReplyCode());
-        }
-    }
-
-    //    @Override
-    public BufferedReader read(String fileUri) {
-        int retry = 3;
-        while (retry-- > 0) {
-            try {
-                URI uri = URI.create(fileUri);
-                FTPClient ftpClient = connect(uri);
-                InputStream input = ftpClient.retrieveFileStream(uri.getPath());
-                FtpBufferedReader reader = new FtpBufferedReader(new InputStreamReader(input, Charsets.UTF_8),
-                        ftpClient);
-                return reader;
-            } catch (Exception e) {
-                if (retry > 0) {
-                    logger.warn("{}, will retry ({}) times ...", e.getMessage(), retry);
-                } else {
-
-                }
+    public BufferedReader read(String fileUri) throws IOException {
+        int retryTimes = this.retryTimes;
+        try {
+            URL url = new URL(fileUri);
+            BufferedReader bufferedReader;
+            FTPClient ftpClient = this.connect(url);
+            InputStream inputStream = ftpClient.retrieveFileStream(url.getPath());
+            bufferedReader = new BufferedReader(new InputStreamReader(inputStream, Charsets.UTF_8));
+            return bufferedReader;
+        } catch (IOException e) {
+            logger.warn("{}, retry to read {}...", e.getMessage(), fileUri);
+            retryTimes--;
+            if (retryTimes >= 0) {
+                this.read(fileUri);
             }
         }
         return null;
     }
 
-    public static class FtpBufferedReader extends BufferedReader {
-
-        private FTPClient ftpClient;
-
-        public FtpBufferedReader(Reader in, FTPClient ftpClient) {
-            super(in);
-            this.ftpClient = ftpClient;
-        }
-
-        @Override
-        public void close() throws IOException {
-            super.close();
-            FTPReader.close(ftpClient);
-        }
+    public void close() throws IOException {
+        if (this.ftpClient == null) throw new IOException("FTP client is null.");
+        // 是否有未完成任务
+        boolean cmdCompleted = ftpClient.completePendingCommand();
+        // close all
+        this.ftpClient.logout();
+        this.ftpClient.disconnect();
+        if (!cmdCompleted)
+            logger.warn("failed transfer. ReplyCode-{}", ftpClient.getReplyCode());
     }
-
 }
+

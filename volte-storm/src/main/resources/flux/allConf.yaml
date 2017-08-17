@@ -1,0 +1,190 @@
+name: "volte-delay-topology"
+
+config:
+  topology.workers: 30
+
+  topology.worker.childopts: "-server -Xms6g -Xmx6g -Xmn3g -XX:ParallelGCThreads=10"
+  topology.fall.back.on.java.serialization: false
+  topology.skip.missing.kryo.registrations: false
+  topology.acker.executors: 0
+  topology.executor.send.buffer.size: 2048
+  topology.executor.receive.buffer.size: 2048
+  topology.receiver.buffer.size: 64
+  topology.transfer.buffer.size: 8192
+  storm.messaging.netty.sync.mode: false
+  topology.buffer.size.limited: false
+
+  project.spout.type: kafka
+  project.spout.ftp.reader.threads: 5
+  project.spout.kafka.reader.threads: 128
+
+  project.bolt.kafka.writer.threads: 10
+
+  project.network_element.table.name: "IPMSDS3.NETWOKR_ELEMENT"
+
+  project.mq.broker.url: "tcp://10.221.247.23:61616"
+  project.mq.queue.name: "Q_EVENT_PMCA_FILE"
+
+
+  project.hdfs.url: "hdfs://nameservice1"
+  project.hdfs.path: "/rawdata/xdr/lte/volte/volte_timeseg/"
+
+  project.properties.path: "../flux/volte-configration.properties"
+
+# kafka conf
+  kafka.group.id: volte_delay_topology
+  kafka.bootstrap.servers: "10.11.94.54:6667,10.11.94.62:6667,10.11.94.70:6667,10.11.94.77:6667,10.11.94.177:6667,10.11.94.179:6667,10.11.94.183:6667,10.11.94.185:6667,10.11.94.186:6667,10.11.94.190:6667,10.11.94.192:6667,10.11.94.107:6667,10.11.94.100:6667,10.11.94.92:6667,10.11.94.84:6667,10.11.94.156:6667"
+  #reader
+  kafka.topic.names: ["r_volte_Bigxdr", "r_volte_Cx", "r_volte_Gm", "r_volte_ISC", "r_volte_Mg", "r_volte_Mi", "r_volte_Mw", "r_volte_Rx", "r_volte_Sh", "r_volte_Zh", "r_volte_Mj", "r_volte_Dh", "r_volte_Dx", "r_nc_bicc"]
+  kafka.key.deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+  kafka.value.deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+  kafka.auto.offset.reset: latest
+
+  #writer
+  project.bolt.kafka.writer.topic: r_volte_delay
+  kafka.acks: 1
+  kafka.retries: 1
+  kafka.batch.size: 16384
+  kafka.linger.ms: 0
+  kafka.buffer.memory: 33554432
+  kafka.key.serializer: org.apache.kafka.common.serialization.StringSerializer
+  kafka.value.serializer: org.apache.kafka.common.serialization.StringSerializer
+
+
+#  worker.childopts: "-Xmx3g"
+#  topology.metrics.consumer.register:
+#    - class: "org.apache.storm.metric.LoggingMetricsConsumer"
+#      parallelism.hint: 1
+
+#includes:
+#  - resource: false
+#    file: "../../linghang.kong/volte/flux/redisPool.yaml"
+#    override: false
+
+  pubsub.jedis.address: 10.11.94.160:6301
+  pubsub.jedis.password: stream!23$
+
+  jedis.minIdle: 4
+  jedis.maxIdle: 4
+  jedis.maxTotal: 4
+  jedis.testOnBorrow: false
+  jedis.password: stream!23$
+  jedis.addresses:
+    - 10.11.94.155:6451
+    - 10.11.94.160:6451
+    - 10.11.94.161:6451
+    - 10.11.94.162:6451
+    - 10.11.94.163:6451
+    - 10.11.94.167:6451
+    - 10.11.94.168:6451
+    - 10.11.94.169:6451
+    - 10.11.94.170:6451
+    - 10.11.94.171:6451
+    - 10.11.94.175:6451
+    - 10.11.94.176:6451
+    - 10.11.94.204:6451
+    - 10.11.94.205:6451
+    - 10.11.94.206:6451
+    - 10.11.94.207:6451
+    - 10.11.94.208:6451
+    - 10.11.94.209:6451
+    - 10.11.94.210:6451
+    - 10.11.94.211:6451
+    - 10.11.94.212:6451
+    - 10.11.94.213:6451
+    - 10.11.94.155:6452
+    - 10.11.94.160:6452
+    - 10.11.94.161:6452
+    - 10.11.94.162:6452
+    - 10.11.94.163:6452
+    - 10.11.94.167:6452
+    - 10.11.94.168:6452
+    - 10.11.94.169:6452
+    - 10.11.94.170:6452
+    - 10.11.94.171:6452
+    - 10.11.94.175:6452
+    - 10.11.94.176:6452
+    - 10.11.94.204:6452
+    - 10.11.94.205:6452
+    - 10.11.94.206:6452
+    - 10.11.94.207:6452
+    - 10.11.94.208:6452
+    - 10.11.94.209:6452
+    - 10.11.94.210:6452
+    - 10.11.94.211:6452
+    - 10.11.94.212:6452
+    - 10.11.94.213:6452
+
+#  - resource: false
+#    file: "../../linghang.kong/volte/flux/serializer.yaml"
+#    override: false
+
+  topology.kryo.register:
+    - com.eastcom.volte.data.gmtype.gm.Gm: com.eastcom.volte.data.gmtype.gm.GmSerializer
+    - com.eastcom.volte.data.gmtype.isc.ISC: com.eastcom.volte.data.gmtype.isc.ISCSerializer
+    - com.eastcom.volte.data.gmtype.mg.Mg: com.eastcom.volte.data.gmtype.mg.MgSerializer
+    - com.eastcom.volte.data.gmtype.mi.Mi: com.eastcom.volte.data.gmtype.mi.MiSerializer
+    - com.eastcom.volte.data.gmtype.mj.Mj: com.eastcom.volte.data.gmtype.mj.MjSerializer
+    - com.eastcom.volte.data.gmtype.mw.Mw: com.eastcom.volte.data.gmtype.mw.MwSerializer
+
+    - com.eastcom.volte.data.cxtype.cx.Cx: com.eastcom.volte.data.cxtype.cx.CxSerializer
+    - com.eastcom.volte.data.cxtype.dh.Dh: com.eastcom.volte.data.cxtype.dh.DhSerializer
+    - com.eastcom.volte.data.cxtype.dx.Dx: com.eastcom.volte.data.cxtype.dx.DxSerializer
+    - com.eastcom.volte.data.cxtype.sh.Sh: com.eastcom.volte.data.cxtype.sh.ShSerializer
+    - com.eastcom.volte.data.cxtype.zh.Zh: com.eastcom.volte.data.cxtype.zh.ZhSerializer
+
+    - com.eastcom.volte.data.gxtype.rx.Rx: com.eastcom.volte.data.gxtype.rx.RxSerializer
+
+    - com.eastcom.volte.data.xdr.MergedXDR: com.eastcom.volte.data.xdr.MergedXDRSerializer
+
+    - com.eastcom.volte.data.nc.Nc: com.eastcom.volte.data.nc.NcSerializer
+    - com.eastcom.volte.data.volte.VoLTE: com.eastcom.volte.data.volte.VoLTESerializer
+
+    - com.eastcom.volte.storm.storm.arithmetic.MergedArithmetic: com.esotericsoftware.kryo.serializers.JavaSerializer
+
+#  - resource: false
+#    file: "../../linghang.kong/volte/flux/hdfs-conf.yaml"
+#    override: false
+
+  hdfs.url: hdfs://hdp
+  hdfs.path: /rawdata/xdr/lte/volte/volte_timeseg/
+  hdfs.batch: 100000
+  hdfs.createDir.interval: 5
+  hdfs.file.content.split: |
+  hdfs.file.name.prefix: volte_
+
+#topologySource:
+#    className: "com.eastcom.volte.storm.storm.worker.VoLTETopology"
+#    methodName: "getTopology"
+
+
+
+# spout definitions
+spouts:
+  - id: "spoutData"
+    className: "com.eastcom.volte.storm.storm.worker.VoLTESpout"
+    parallelism: 10
+
+# bolt definitions
+bolts:
+  - id: "boltData"
+    className: "com.eastcom.volte.storm.storm.worker.VoLTEBolt"
+    parallelism: 10
+  - id: "outputKafka"
+    className: "com.eastcom.volte.storm.storm.worker.OutputKafkaBolt"
+    parallelism: 10
+
+#stream definitions
+streams:
+  - name: "spoutData --> boltData"
+    from: "spoutData"
+    to: "boltData"
+    grouping:
+      type: FIELDS
+      args: ["partition"]
+
+  - name: "boltData --> outputKafka"
+    from: "boltData"
+    to: "outputKafka"
+    grouping:
+      type: SHUFFLE

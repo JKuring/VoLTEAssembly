@@ -1,14 +1,19 @@
 package com.eastcom.volte.storm.storm.base;
 
 
+import com.eastcom.volte.storm.common.kafka.ConfigKey;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.client.HdfsDataOutputStream;
 import org.apache.storm.hdfs.bolt.AbstractHdfsBolt;
+import org.apache.storm.hdfs.bolt.format.DefaultFileNameFormat;
+import org.apache.storm.hdfs.bolt.format.DelimitedRecordFormat;
 import org.apache.storm.hdfs.bolt.format.FileNameFormat;
 import org.apache.storm.hdfs.bolt.format.RecordFormat;
 import org.apache.storm.hdfs.bolt.rotation.FileRotationPolicy;
+import org.apache.storm.hdfs.bolt.rotation.TimedRotationPolicy;
+import org.apache.storm.hdfs.bolt.sync.CountSyncPolicy;
 import org.apache.storm.hdfs.bolt.sync.SyncPolicy;
 import org.apache.storm.hdfs.common.rotation.RotationAction;
 import org.apache.storm.task.OutputCollector;
@@ -23,6 +28,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.Map;
+
+import static org.apache.commons.collections4.MapUtils.getIntValue;
+import static org.apache.commons.collections4.MapUtils.getString;
 
 /**
  * Created by linghang.kong on 2016/5/17.
@@ -81,6 +89,19 @@ public class OutputDataBolt extends AbstractHdfsBolt {
 
     @Override
     public void doPrepare(Map conf, TopologyContext topologyContext, OutputCollector collector) throws IOException {
+
+        // use "|" instead of "," for field delimiter
+        RecordFormat format = new DelimitedRecordFormat().withFieldDelimiter(getString(conf, ConfigKey.HDFS_FILE_CONTENT_SPLIT));
+        // sync the filesystem after every 1k tuples
+        SyncPolicy syncPolicy = new CountSyncPolicy(getIntValue(conf, ConfigKey.HDFS_BATCH));
+        // rotate files， 5 minutes
+        FileRotationPolicy rotationPolicy = new TimedRotationPolicy(getIntValue(conf, ConfigKey.HDFS_CREATEDIR_INTERVAL), TimedRotationPolicy.TimeUnit.MINUTES);
+        FileNameFormat fileNameFormat = new DefaultFileNameFormat().withPath(getString(conf, ConfigKey.HDFS_PATH)).withPrefix(getString(conf, ConfigKey.HDFS_FILE_NAME_PREFIX))
+                .withExtension(".csv");
+        this.withFsUrl(getString(conf, ConfigKey.HDFS_URL)).withFileNameFormat(fileNameFormat).withRecordFormat(format)
+                .withRotationPolicy(rotationPolicy).withSyncPolicy(syncPolicy);
+
+
         LOG.info("Preparing HDFS Bolt...");
         this.fs = FileSystem.get(URI.create(this.fsUrl), hdfsConfig);
     }

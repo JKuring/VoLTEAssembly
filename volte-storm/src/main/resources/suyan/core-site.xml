@@ -1,0 +1,301 @@
+<!--Thu Apr 27 21:24:28 2017-->
+<configuration>
+
+    <property>
+        <name>fs.defaultFS</name>
+        <value>hdfs://hdp</value>
+    </property>
+
+    <property>
+        <name>fs.trash.interval</name>
+        <value>360</value>
+    </property>
+
+    <property>
+        <name>ha.failover-controller.active-standby-elector.zk.op.retries</name>
+        <value>120</value>
+    </property>
+
+    <property>
+        <name>ha.zookeeper.quorum</name>
+        <value>yp-hdp-apollo4200-6024:2181,yp-hdp-apollo4200-6025:2181,yp-hdp-apollo4200-6026:2181</value>
+    </property>
+
+    <property>
+        <name>hadoop.group.enable.ldap</name>
+        <value>false</value>
+    </property>
+
+    <property>
+        <name>hadoop.http.authentication.simple.anonymous.allowed</name>
+        <value>true</value>
+    </property>
+
+    <property>
+        <name>hadoop.http.staticuser.user</name>
+        <value>yarn</value>
+    </property>
+
+    <property>
+        <name>hadoop.proxyuser.hcat.groups</name>
+        <value>*</value>
+    </property>
+
+    <property>
+        <name>hadoop.proxyuser.hcat.hosts</name>
+        <value>*</value>
+    </property>
+
+    <property>
+        <name>hadoop.proxyuser.hdfs.groups</name>
+        <value>*</value>
+    </property>
+
+    <property>
+        <name>hadoop.proxyuser.hdfs.hosts</name>
+        <value>*</value>
+    </property>
+
+    <property>
+        <name>hadoop.proxyuser.hive.groups</name>
+        <value>*</value>
+    </property>
+
+    <property>
+        <name>hadoop.proxyuser.hive.hosts</name>
+        <value>*</value>
+    </property>
+
+    <property>
+        <name>hadoop.proxyuser.hive.users</name>
+        <value>asiainfo</value>
+    </property>
+
+    <property>
+        <name>hadoop.proxyuser.HTTP.groups</name>
+        <value>users</value>
+    </property>
+
+    <property>
+        <name>hadoop.proxyuser.HTTP.hosts</name>
+        <value>yp-hdp-apollo4200-6026</value>
+    </property>
+
+    <property>
+        <name>hadoop.proxyuser.yarn.groups</name>
+        <value>*</value>
+    </property>
+
+    <property>
+        <name>hadoop.proxyuser.yarn.hosts</name>
+        <value>yp-hdp-apollo4200-6025,yp-hdp-apollo4200-6024</value>
+    </property>
+
+    <property>
+        <name>hadoop.rpc.protection</name>
+        <value>authentication</value>
+    </property>
+
+    <property>
+        <name>hadoop.security.auth_to_local</name>
+        <value>RULE:[1:$1@$0](ambari-qa-YP_BD@BCHKDC)s/.*/ambari-qa/
+            RULE:[1:$1@$0](hbase-YP_BD@BCHKDC)s/.*/hbase/
+            RULE:[1:$1@$0](hdfs-YP_BD@BCHKDC)s/.*/hdfs/
+            RULE:[1:$1@$0](slider-YP_BD@BCHKDC)s/.*/slider/
+            RULE:[1:$1@$0](spark@BCHKDC)s/.*/spark/
+            RULE:[1:$1@$0](.*@BCHKDC)s/@.*//
+            RULE:[2:$1@$0](amshbase@BCHKDC)s/.*/ams/
+            RULE:[2:$1@$0](amshbasemaster@BCHKDC)s/.*/ams/
+            RULE:[2:$1@$0](dn@BCHKDC)s/.*/hdfs/
+            RULE:[2:$1@$0](hbase@BCHKDC)s/.*/hbase/
+            RULE:[2:$1@$0](hive@BCHKDC)s/.*/hive/
+            RULE:[2:$1@$0](jhs@BCHKDC)s/.*/mapred/
+            RULE:[2:$1@$0](jn@BCHKDC)s/.*/hdfs/
+            RULE:[2:$1@$0](nfs@BCHKDC)s/.*/hdfs/
+            RULE:[2:$1@$0](nm@BCHKDC)s/.*/yarn/
+            RULE:[2:$1@$0](nn@BCHKDC)s/.*/hdfs/
+            RULE:[2:$1@$0](rm@BCHKDC)s/.*/yarn/
+            RULE:[2:$1@$0](slider@BCHKDC)s/.*/slider/
+            RULE:[2:$1@$0](yarn@BCHKDC)s/.*/yarn/
+            RULE:[2:$1@$0]([nd]n@.*)s/.*/hdfs/
+            RULE:[2:$1@$0]([rn]m@.*)s/.*/yarn/
+            RULE:[2:$1@$0](hm@.*)s/.*/hbase/
+            RULE:[2:$1@$0](jhs@.*)s/.*/mapred/
+            RULE:[2:$1@$0](rs@.*)s/.*/hbase/
+            DEFAULT
+        </value>
+    </property>
+
+    <property>
+        <name>hadoop.security.authentication</name>
+        <value>kerberos</value>
+    </property>
+
+    <property>
+        <name>hadoop.security.authorization</name>
+        <value>true</value>
+    </property>
+
+    <property>
+        <name>hadoop.security.bdoc.access.id</name>
+        <value>admin</value>
+    </property>
+
+    <property>
+        <name>hadoop.security.bdoc.access.key</name>
+        <value>admin</value>
+    </property>
+
+    <property>
+        <name>hadoop.security.bdoc.password.file</name>
+        <value>bdoc-password.txt</value>
+    </property>
+
+    <property>
+        <name>hadoop.security.bdoc.password.interval</name>
+        <value>30000</value>
+    </property>
+
+    <property>
+        <name>hadoop.security.enable.bdoc.authentication</name>
+        <value>true</value>
+    </property>
+
+    <property>
+        <name>hadoop.security.group.mapping</name>
+        <value>org.apache.hadoop.security.LdapGroupsMapping</value>
+    </property>
+
+    <property>
+        <name>hadoop.security.group.mapping.ldap.base</name>
+        <value>dc=hadoop,dc=apache,dc=org</value>
+    </property>
+
+    <property>
+        <name>hadoop.security.group.mapping.ldap.bind.password</name>
+        <value>123123</value>
+    </property>
+
+    <property>
+        <name>hadoop.security.group.mapping.ldap.bind.user</name>
+        <value>cn=Manager,dc=hadoop,dc=apache,dc=org</value>
+    </property>
+
+    <property>
+        <name>hadoop.security.group.mapping.ldap.search.attr.group.name</name>
+        <value>cn</value>
+    </property>
+
+    <property>
+        <name>hadoop.security.group.mapping.ldap.search.attr.member</name>
+        <value>member</value>
+    </property>
+
+    <property>
+        <name>hadoop.security.group.mapping.ldap.search.filter.group</name>
+        <value>(objectclass=groupOfNames)</value>
+    </property>
+
+    <property>
+        <name>hadoop.security.group.mapping.ldap.search.filter.user</name>
+        <value>(&amp;(objectclass=person)(cn={0}))</value>
+    </property>
+
+    <property>
+        <name>hadoop.security.group.mapping.ldap.url</name>
+        <value>ldap://10.11.122.20:389</value>
+    </property>
+
+    <property>
+        <name>hadoop.security.key.provider.path</name>
+        <value>kms://http@localhost:16000/kms</value>
+    </property>
+
+    <property>
+        <name>hadoop.security.loose.bdoc.authentication</name>
+        <value>false</value>
+    </property>
+
+    <property>
+        <name>hadoop.security.system.user</name>
+        <value>bdi</value>
+    </property>
+
+    <property>
+        <name>hadoop.security.user.mapping.class</name>
+        <value>org.apache.hadoop.security.PasswordFileBasedUserMapping</value>
+    </property>
+
+    <property>
+        <name>io.compression.codecs</name>
+        <value>
+            org.apache.hadoop.io.compress.GzipCodec,org.apache.hadoop.io.compress.DefaultCodec,org.apache.hadoop.io.compress.SnappyCodec
+        </value>
+    </property>
+
+    <property>
+        <name>io.file.buffer.size</name>
+        <value>131072</value>
+    </property>
+
+    <property>
+        <name>io.serializations</name>
+        <value>org.apache.hadoop.io.serializer.WritableSerialization</value>
+    </property>
+
+    <property>
+        <name>ipc.client.connect.max.retries</name>
+        <value>10</value>
+    </property>
+
+    <property>
+        <name>ipc.client.connect.max.retries.on.timeouts</name>
+        <value>10</value>
+    </property>
+
+    <property>
+        <name>ipc.client.connect.timeout</name>
+        <value>10000</value>
+    </property>
+
+    <property>
+        <name>ipc.client.connection.maxidletime</name>
+        <value>30000</value>
+    </property>
+
+    <property>
+        <name>ipc.client.idlethreshold</name>
+        <value>8000</value>
+    </property>
+
+    <property>
+        <name>ipc.client.ping</name>
+        <value>false</value>
+    </property>
+
+    <property>
+        <name>ipc.client.rpc.timeout</name>
+        <value>180000</value>
+    </property>
+
+    <property>
+        <name>ipc.server.tcpnodelay</name>
+        <value>true</value>
+    </property>
+
+    <property>
+        <name>mapreduce.jobtracker.webinterface.trusted</name>
+        <value>false</value>
+    </property>
+
+    <property>
+        <name>net.topology.script.file.name</name>
+        <value>/cmss/bch/bc1.3.4/hadoop/etc/hadoop/topology_script.py</value>
+    </property>
+
+    <property>
+        <name>proxyuser_group</name>
+        <value>users</value>
+    </property>
+
+</configuration>

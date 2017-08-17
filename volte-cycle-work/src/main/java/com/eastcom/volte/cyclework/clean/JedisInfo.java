@@ -1,5 +1,11 @@
 package com.eastcom.volte.cyclework.clean;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,51 +14,30 @@ import java.util.List;
  */
 public class JedisInfo {
 
+    private static final Logger logger = LoggerFactory.getLogger(JedisInfo.class);
+
+
     private int minIdle;
     private String password;
     private List<String> addresses;
 
-    public JedisInfo() {
-        this.minIdle = 4;
-        this.password = "stream!23$";
+    public JedisInfo(String password, int minIdle) {
+        this.password = password;
+        this.minIdle = minIdle;
         this.addresses = new ArrayList<>();
-        addresses.add("10.11.58.92:6401");
-        addresses.add("10.11.58.92:6402");
-        addresses.add("10.11.58.92:6403");
-        addresses.add("10.11.58.92:6404");
-        addresses.add("10.11.58.92:6405");
-        addresses.add("10.11.58.92:6406");
-        addresses.add("10.11.58.92:6407");
-        addresses.add("10.11.58.92:6408");
-        addresses.add("10.11.58.92:6409");
-        addresses.add("10.11.58.92:6410");
-        addresses.add("10.11.58.92:6411");
-        addresses.add("10.11.58.92:6412");
-        addresses.add("10.11.58.93:6401");
-        addresses.add("10.11.58.93:6402");
-        addresses.add("10.11.58.93:6403");
-        addresses.add("10.11.58.93:6404");
-        addresses.add("10.11.58.93:6405");
-        addresses.add("10.11.58.93:6406");
-        addresses.add("10.11.58.93:6407");
-        addresses.add("10.11.58.93:6408");
-        addresses.add("10.11.58.93:6409");
-        addresses.add("10.11.58.93:6410");
-        addresses.add("10.11.58.93:6411");
-        addresses.add("10.11.58.93:6412");
-        addresses.add("10.11.58.94:6401");
-        addresses.add("10.11.58.94:6402");
-        addresses.add("10.11.58.94:6403");
-        addresses.add("10.11.58.94:6404");
-        addresses.add("10.11.58.94:6405");
-        addresses.add("10.11.58.94:6406");
-        addresses.add("10.11.58.94:6407");
-        addresses.add("10.11.58.94:6408");
-        addresses.add("10.11.58.94:6409");
-        addresses.add("10.11.58.94:6410");
-        addresses.add("10.11.58.94:6411");
-        addresses.add("10.11.58.94:6412");
-
+        String userDir = System.getProperty("user.dir") + "/../conf/redisList.txt";
+        logger.info("redis list path: {}.", userDir);
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(userDir))) {
+            String tmp;
+            while ((tmp = bufferedReader.readLine()) != null) {
+                tmp = tmp.replaceAll(" ", "");
+                logger.info(tmp);
+                addresses.add(tmp);
+            }
+            logger.info("Finish fetching redis list.");
+        } catch (IOException e) {
+            logger.error("Failed to read the redis list.", e);
+        }
     }
 
     public int getMinIdle() {

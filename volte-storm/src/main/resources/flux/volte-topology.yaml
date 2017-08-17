@@ -1,4 +1,4 @@
-name: "volte-topology"
+name: "volte-delay-topology"
 
 config:
   topology.workers: 40
@@ -14,24 +14,24 @@ config:
   storm.messaging.netty.sync.mode: false
   topology.buffer.size.limited: false
 
-  project.spout.parallelism: 10
-  project.bolt.parallelism: 10
+#  project.spout.parallelism: 20
+#  project.bolt.parallelism: 10
 
 
-  project.spout.name: "VoLTESpout"
-  project.bolt.name: "VoLTEBolt"
-  project.output.name: "OutputDataBolt"
+#  project.spout.name: "VoLTESpout"
+#  project.bolt.name: "VoLTEBolt"
+#  project.output.name: "OutputDataBolt"
 
-  project.spout.threads.file: 1
-  project.spout.threads.read: 1
+  project.spout.type: kafka
+  project.spout.ftp.reader.threads: 5
+  project.spout.kafka.reader.threads: 128
 
-  project.activemq.broker.mqURL: "tcp://10.221.247.23:61616"
-  project.activemq.name: "ActiveMQ"
-  project.activemq.queue.name: "Q_EVENT_PMCA_FILE"
+  project.mq.broker.url: "tcp://10.221.247.23:61616"
+  project.mq.queue.name: "Q_EVENT_PMCA_FILE"
 
-  project.spout.tuple.name: "spoutData"
-  project.bolt.tuple.name: "boltData"
-  project.output.name: "outputHDFS"
+#  project.spout.tuple.name: "spoutData"
+#  project.bolt.tuple.name: "boltData"
+#  project.output.name: "outputHDFS"
 
 
   project.hdfs.url: "hdfs://nameservice1"
@@ -39,12 +39,12 @@ config:
 
   project.properties.path: "../flux/volte-configration.properties"
 
-  # 最好把驱动打成架包，动态获取
-  project.jdbc.driver: "com.mysql.jdbc.Driver"
-  project.jdbc.url: "jdbc:mysql://10.11.58.95:3306/Volte"
-  project.jdbc.username: "root"
-  project.jdbc.password: "root"
-  project.jdbc.table.name: "NetworkElement"
+#  # 最好把驱动打成架包，动态获取
+#  project.jdbc.driver: "com.mysql.jdbc.Driver"
+#  project.jdbc.url: "jdbc:mysql://10.11.58.95:3306/Volte"
+#  project.jdbc.username: "root"
+#  project.jdbc.password: "root"
+#  project.jdbc.table.name: "NetworkElement"
 
 
 #  # zk data
@@ -58,10 +58,19 @@ config:
 #  project.esper.eplStatement.name: "select"
 #  project.esper.eplStatement.statement: "select irstream name, age from Person.win:time(1 sec) where name !="""
 
-  worker.childopts: "-Xmx3g"
-  topology.metrics.consumer.register:
-    - class: "org.apache.storm.metric.LoggingMetricsConsumer"
-      parallelism.hint: 1
+# kafka conf
+  kafka.group.id: ue_topology
+  kafka.topic.names: ["r_volte_Bigxdr", "r_volte_Cx", "r_volte_Gm", "r_volte_ISC", "r_volte_Mg", "r_volte_Mi", "r_volte_Mw", "r_volte_Rx", "r_volte_Sh", "r_volte_Zh", "r_volte_Mj", "r_volte_Dh", "r_volte_Dx", "r_nc_bicc"]
+  kafka.bootstrap.servers: "10.11.94.54:6667,10.11.94.62:6667,10.11.94.70:6667,10.11.94.77:6667,10.11.94.177:6667,10.11.94.179:6667,10.11.94.183:6667,10.11.94.185:6667,10.11.94.186:6667,10.11.94.190:6667,10.11.94.192:6667,10.11.94.107:6667,10.11.94.100:6667,10.11.94.92:6667,10.11.94.84:6667,10.11.94.156:6667"
+  kafka.key.deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+  kafka.value.deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+  kafka.auto.offset.reset: latest
+
+
+#  worker.childopts: "-Xmx3g"
+#  topology.metrics.consumer.register:
+#    - class: "org.apache.storm.metric.LoggingMetricsConsumer"
+#      parallelism.hint: 1
 
 includes:
   - resource: false
@@ -70,38 +79,42 @@ includes:
   - resource: false
     file: "../../linghang.kong/volte/flux/serializer.yaml"
     override: false
+  - resource: false
+    file: "../../linghang.kong/volte/flux/hdfs-conf.yaml"
+    override: false
 
-topologySource:
-    className: "com.eastcom.volte.storm.storm.worker.VoLTETopology"
-    methodName: "getTopology"
+#topologySource:
+#    className: "com.eastcom.volte.storm.storm.worker.VoLTETopology"
+#    methodName: "getTopology"
 
 
-## spout definitions
-#spouts:
-#  - id: "esperSpout"
-#    className: "worker.WorkerSpoutut"
-#    parallelism: 5
-#
-## bolt definitions
-#bolts:
-#  - id: "esperBolt1"
-#    className: "worker.WorkerBoltlt"
-#    parallelism: 5
-#  #- id: "esperBolt2"
-#   # className: "worker.WorkerBoltlt"
-#    #parallelism: 1
-#
-##stream definitions
-#streams:
-#  - name: "esperSpout --> esperBolt1" # name isn't used (placeholder for logging, UI, etc.)
-#    from: "esperSpout"
-#    to: "esperBolt1"
-#    grouping:
-#      type: FIELDS
-#      args: ["esperspoutdata"]
-#
-#  #- name: "esperBolt1 --> esperBolt2"
-#   # from: "esperBolt1"
-#    #to: "esperBolt2"
-#    #grouping:
-#      #type: SHUFFLE
+
+# spout definitions
+spouts:
+  - id: "spoutData"
+    className: "com.eastcom.volte.storm.storm.worker.VoLTESpout"
+    parallelism: 10
+
+# bolt definitions
+bolts:
+  - id: "boltData"
+    className: "com.eastcom.volte.storm.storm.worker.VoLTEBolt"
+    parallelism: 10
+  - id: "outputHDFS"
+    className: "com.eastcom.volte.storm.storm.base.OutputDataBolt"
+    parallelism: 10
+
+#stream definitions
+streams:
+  - name: "spoutData --> boltData"
+    from: "spoutData"
+    to: "boltData"
+    grouping:
+      type: FIELDS
+      args: ["partition"]
+
+  - name: "boltData --> outputHDFS"
+    from: "boltData"
+    to: "outputHDFS"
+    grouping:
+      type: SHUFFLE

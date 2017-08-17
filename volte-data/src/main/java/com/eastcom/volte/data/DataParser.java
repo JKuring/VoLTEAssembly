@@ -44,9 +44,9 @@ public abstract class DataParser<T> {
     //public static final String GX = "Gx";
     public static final String RX = "Rx";
 
-    public static final String NC = "nc";
+    public static final String NC = "nc_bicc";
 
-    public static final String MERGED_XDR = "bigxdrmomt";
+    public static final String MERGED_XDR = "Bigxdr";
 
     public static final List<String> INTERFACES = Arrays.asList(GM, ISC, MG, MI, MJ, MW, CX, DH, DX, SH, ZH, RX, NC, MERGED_XDR);
     private static Logger logger = LoggerFactory.getLogger(DataParser.class);

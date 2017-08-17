@@ -39,4 +39,8 @@ public class DBCPConnectionPool {
         }
         return null;
     }
+
+    public void close(Connection connection) throws SQLException {
+        connection.close();
+    }
 }

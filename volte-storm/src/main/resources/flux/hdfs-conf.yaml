@@ -1,0 +1,8 @@
+config:
+# core-site.xml and hdfs-site.xml were compressed to the topology jar
+    hdfs.url: hdfs://hdp
+    hdfs.path: /rawdata/xdr/lte/volte/volte_timeseg/
+    hdfs.batch: 100000
+    hdfs.createDir.interval: 5
+    hdfs.file.content.split: |
+    hdfs.file.name.prefix: volte_

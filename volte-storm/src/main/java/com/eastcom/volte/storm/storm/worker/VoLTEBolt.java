@@ -2,10 +2,10 @@ package com.eastcom.volte.storm.storm.worker;
 
 import com.eastcom.volte.data.DataCommon;
 import com.eastcom.volte.data.xdr.MergedXDR;
+import com.eastcom.volte.storm.common.kafka.ConfigKey;
 import com.eastcom.volte.storm.storm.arithmetic.MergedArithmetic;
 import com.eastcom.volte.storm.storm.base.BaseBoltImpl;
 import org.apache.commons.collections.MapUtils;
-import org.apache.logging.log4j.core.util.Integers;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.tuple.Values;
 import org.slf4j.Logger;
@@ -32,17 +32,11 @@ public class VoLTEBolt extends BaseBoltImpl<String, DataCommon> {
     public void config(Map config) {
         // read configuration from local yaml file
 
-        setBoltParallelism(Integers.parseInt(String.valueOf(config.get("project.bolt.parallelism"))));
 
-        setReadThread_NUM(MapUtils.getIntValue(config, "project.spout.threads.read"));
-
-        setSpoutTupleName(MapUtils.getString(config, "project.spout.tuple.name"));
-        setBoltTupleName(MapUtils.getString(config, "project.bolt.tuple.name"));
-
-        setRedisMinMultiple(MapUtils.getIntValue(config, "jedis.minIdle"));
-        setRedisPassword(MapUtils.getString(config, "jedis.password"));
-        setRedisAddresses((List<String>) config.get("jedis.addresses"));
-        setTableName((String) config.get("project.jdbc.table.name"));
+        setRedisMinMultiple(MapUtils.getIntValue(config, ConfigKey.JEDIS_MINDLE));
+        setRedisPassword(MapUtils.getString(config, ConfigKey.JEDIS_PASSWORD));
+        setRedisAddresses((List<String>) config.get(ConfigKey.JEDIS_ADDRESSES));
+        setTableName((String) config.get(ConfigKey.PROJECT_NETWORK_ELEMENT_TABLE_NAME));
 
     }
 

@@ -6,9 +6,6 @@ import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -32,12 +29,17 @@ public class DataClear {
     //    private ScheduledExecutorService s = new ScheduledThreadPoolExecutor(5);
     private Runnable doClean;
 
-    private static final String algorithm = "MD5";
 
-    public DataClear(long DELAY_TIME, long CLEAR_TIME) {
+    public DataClear(long DELAY_TIME, long CLEAR_TIME, String password) {
         this.DELAY_TIME = DELAY_TIME;
         this.CLEAR_TIME = CLEAR_TIME;
-        this.jedisInfo = new JedisInfo();
+        this.jedisInfo = new JedisInfo(password, 4);
+    }
+
+    public DataClear(long DELAY_TIME, long CLEAR_TIME, String password, int minIdle) {
+        this.DELAY_TIME = DELAY_TIME;
+        this.CLEAR_TIME = CLEAR_TIME;
+        this.jedisInfo = new JedisInfo(password, minIdle);
     }
 
     /**
@@ -64,12 +66,9 @@ public class DataClear {
                             } while (jedis == null && !jedis.isConnected());
                             pipeline = jedis.pipelined();
                             String currentTime = TimeTransform.getDate(System.currentTimeMillis() - DELAY_TIME * 60 * 60 * 1000);
-                            //添加加密分区算法
-                            String encodedTimePartitionName = subMD5String(currentTime) + "|" + currentTime;
-
-                            Set<String> expireTable = jedis.smembers(encodedTimePartitionName);
+                            Set<String> expireTable = jedis.smembers(currentTime);
                             int table_size = expireTable.size();
-                            logger.info("table size {}, encodedTimePartitionName {}; ip: {}, port: {}.", expireTable.size(), encodedTimePartitionName, jedisIP, jedisPort);
+                            logger.info("table size {}, currentTime {}; ip: {}, port: {}.", expireTable.size(), currentTime, jedisIP, jedisPort);
                             if (table_size > 0) {
                                 for (String expireInfo : expireTable
                                         ) {
@@ -81,11 +80,11 @@ public class DataClear {
                                     if (clearNUM <= 0) {
                                         clearNUM = BATCH;
                                         pipeline.sync();
-                                        pipeline = jedis.pipelined();
+//                                        pipeline = jedis.pipelined();
                                     }
                                     logger.debug("partition: {}, xdr_id: {}.", partitionName, xdr_id);
                                 }
-                                pipeline.del(encodedTimePartitionName);
+                                pipeline.del(currentTime);
                                 pipeline.sync();
                             }
                         } catch (Exception e) {
@@ -107,6 +106,7 @@ public class DataClear {
     private Jedis createJedisHandle(List<String> addresses) {
         Jedis jedis = null;
         try {
+            logger.info("get redis handle.");
             String[] host = addresses.get(new Random().nextInt(addresses.size())).split(":");
             jedisIP = host[0];
             jedisPort = Integer.parseInt(host[1]);
@@ -117,19 +117,5 @@ public class DataClear {
             logger.error("Create a  Jedis Handle , Exception: {}.", e.getMessage());
         }
         return jedis;
-    }
-
-    private String subMD5String(String string) {
-        String encodedString = null;
-        try {
-            MessageDigest messageDigest = MessageDigest.getInstance(algorithm);
-            messageDigest.update(string.getBytes());
-            String tmp = new BigInteger(messageDigest.digest()).toString();
-            int length = tmp.length();
-            encodedString = algorithm + tmp.substring(length - 5);
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        return encodedString;
     }
 }

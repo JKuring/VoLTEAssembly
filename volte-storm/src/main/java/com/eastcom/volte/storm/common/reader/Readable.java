@@ -21,5 +21,4 @@ public interface Readable {
      */
     public BufferedReader read(String fileUri) throws IOException;
 
-
 }
